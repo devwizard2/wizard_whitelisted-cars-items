@@ -1,21 +1,18 @@
 local ESX = nil
 local playerJob = "unemployed"
 
--- Config: set which jobs can use which weapons
 local weaponJobRestrictions = {
     [`weapon_pistol`] = { "police", "sheriff" }, -- allowed jobs
     [`weapon_smg`] = { "police" },
     -- add more weapons and allowed jobs here
 }
 
--- Config: set which jobs can enter which vehicles
 local vehicleJobRestrictions = {
     [GetHashKey("ndds63")] = { "police", "sheriff" },
     [GetHashKey("police2")] = { "police" },
     -- add more vehicles and allowed jobs here
 }
 
--- Helper: check if a value exists in a table
 local function isJobAllowed(job, allowedJobs)
     for _, allowedJob in ipairs(allowedJobs) do
         if job == allowedJob then
@@ -25,7 +22,6 @@ local function isJobAllowed(job, allowedJobs)
     return false
 end
 
--- Get ESX object and player job
 CreateThread(function()
     while ESX == nil do
         ESX = exports["es_extended"]:getSharedObject()
@@ -51,7 +47,6 @@ AddEventHandler('esx:setJob', function(job)
     end
 end)
 
--- Main thread: restrict weapon shooting
 CreateThread(function()
     while true do
         Wait(0)
@@ -75,13 +70,11 @@ CreateThread(function()
     end
 end)
 
--- Main thread: restrict vehicle entry and kick if inside unauthorized
 CreateThread(function()
     while true do
         Wait(0)
         local ped = PlayerPedId()
 
-        -- Try entering vehicle
         if not IsPedInAnyVehicle(ped, false) then
             if IsControlJustPressed(0, 23) or IsControlJustPressed(0, 75) then -- enter vehicle keys
                 local veh = GetClosestVehicle(GetEntityCoords(ped), 5.0, 0, 70)
@@ -93,7 +86,6 @@ CreateThread(function()
                 end
             end
         else
-            -- Kick from unauthorized vehicle if driver
             local veh = GetVehiclePedIsIn(ped, false)
             local model = GetEntityModel(veh)
             if vehicleJobRestrictions[model] and not isJobAllowed(playerJob, vehicleJobRestrictions[model]) then
